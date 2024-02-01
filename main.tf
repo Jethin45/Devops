@@ -1,5 +1,15 @@
 provider "aws" {
-  region = "us-east-1"  # Choose your preferred AWS region
+  region = var.aws_region
+}
+
+data "aws_ami" "latest_amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
 }
 
 module "vpc" {
@@ -7,7 +17,7 @@ module "vpc" {
 }
 
 resource "aws_instance" "web_server" {
-  ami           = "ami-0c55b159cbfafe1f0"
-  instance_type = "t2.micro"
+  ami           = data.aws_ami.latest_amazon_linux.id
+  instance_type = var.instance_type
   subnet_id     = module.vpc.public_subnets[0]
 }
